@@ -187,40 +187,32 @@ var wadperfcounters2 = '<PerformanceCounterConfiguration counterSpecifier="\\Phy
 //   useRemoteGateway: false
 // }
 
-// //Virtual networks, subnets and peering - defined by defence in depth rings
-// //External ring (4)
-// module ExternalVnets 'Config-VNet-External.bicep' = {
-//   name: 'externalVnets'
-//   params: {
-//     dnsSettings: dnsSettings
-//     subscriptions: subscriptions
-//   }
-// }
+//AVD networks
+module CoreVnets 'config_network_core.bicep' = {
+  name: 'CoreVnets'
+  params: {
+    localenv: localenv
+    orgCode: orgCode
+    product: 'core'
+    dnsSettings: dnsServers.ad
+    subscriptions: subscriptions
+  }
+}
 
-
-// //User ring (2)
-// //AVD networks
-// module AVDVnets 'Config-VNet-AVD.bicep' = {
-//   name: 'avdVnets'
-//   params: {
-//     dnsSettings: dnsSettings
-//     subscriptions: subscriptions
-//   }
-// }
-
-// //Systems Ring (1)
-// //Pull in the core vnets
-// module CoreVnets 'Config-VNet-Core.bicep' = {
-//   name: 'coreVnets'
-//   params: {
-//     dnsSettings: dnsSettings
-//     subscriptions: subscriptions
-//   }
-// }
+module AVDVnets 'config_network_avd.bicep' = {
+  name: 'AVDVnets'
+  params: {
+    localenv: localenv
+    orgCode: orgCode
+    product: 'avd'
+    dnsSettings: dnsServers.ad
+    subscriptions: subscriptions
+  }
+}
 
 
 // //Pull all the vnets into a single object
-// var vnetConfigs = union(CoreVnets.outputs.configVnetCore,DataVnets.outputs.configVnetData,AVDVnets.outputs.configVnetAVD,AVDVnets.outputs.configVnetAVDCore,IDEVnets.outputs.configVnetIDE,ExternalVnets.outputs.configVnetExternal)
+var vnetConfigs = union(CoreVnets.outputs.configVnet,AVDVnets.outputs.configVnet)
 
 output tags object = defaultTags
 output common object = commonSettings
@@ -231,6 +223,8 @@ output privateDNSSettings object = privateDNSConfig
 output systemKeyvaults object = systemKeyVaults
 output adDomainSettings object = adDomainSettings
 output coreBastionConfig object = coreBastionConfig
+output vnetAll object = vnetConfigs
+
 
 // output roleAssignmentConfig object = roleAssignmentConfig
 // output vnetCore object = CoreVnets.outputs.configVnetCore
@@ -238,7 +232,7 @@ output coreBastionConfig object = coreBastionConfig
 // output vnetAVD object = AVDVnets.outputs.configVnetAVD
 // output vnetAVDCore object = AVDVnets.outputs.configVnetAVDCore
 // output vnetIDE object = IDEVnets.outputs.configVnetIDE
-// output vnetAll object = vnetConfigs
+
 // output vnetPeering object = peeringConfig
 // output coreFirewallConfigNoEnv object = coreFirewallDetailsCommon
 // output coreFirewallConfig object = coreFirewallConfig

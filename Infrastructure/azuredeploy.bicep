@@ -83,6 +83,16 @@ module LogAnalytics '../Modules/module_LogAnalytics.bicep' = {
 }
 
 // Deploy core vnet and subnet
+module VnetSnetNSG '../Modules/pattern_Vnet_Subnet_NSG.bicep' = {
+  name: 'VnetSnetNSG'
+  scope: RG
+  params: {
+    location: location
+    tags: tags
+    lawID: LogAnalytics.outputs.logAnalyticsID
+    vnetObject: 
+  }
+}
 
 // Deploy keyvault
 // Deploy Bastion
