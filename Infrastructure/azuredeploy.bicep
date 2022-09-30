@@ -58,7 +58,7 @@ resource RG 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 }
 
 //Pull in the Config - can't do this earlier unfortunatly as it needs to be drawn in again an existing RG
-module Config '..//Config/config_common.bicep'= {
+module Config '../Config/config_common.bicep'= {
   name: 'config'
   scope: RG
   params: {
@@ -67,7 +67,6 @@ module Config '..//Config/config_common.bicep'= {
     organisation: organisation
     orgCode: orgCode
     product: product
-    deploymentType: 'infrastructure'
   }
 }
 
@@ -90,7 +89,8 @@ module VnetSnetNSG '../Modules/pattern_Vnet_Subnet_NSG.bicep' = {
     location: location
     tags: tags
     lawID: LogAnalytics.outputs.logAnalyticsID
-    vnetObject: 
+    vnetObject: Config.outputs.vnetAll[localenv].core
+    newDeployment: true
   }
 }
 

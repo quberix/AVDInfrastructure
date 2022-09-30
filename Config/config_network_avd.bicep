@@ -9,7 +9,6 @@ var defaultRGNoEnv = '${orgCode}-RG-${product}}'
 var coreVnetNameNoEnv = '${orgCode}-vnet-${product}}'
 var coreSnetNameNoEnv = '${orgCode}-snet-${product}}'
 var coreNSGNameNoEnv = '${orgCode}-nsg-${product}}'
-var coreRTNameNoEnv = '${orgCode}-rt-${product}}'
 
 //Inbound from AVD (3389-WindowsVirtualDesktop) plus vnet and LB
 var avdInboundStandardRulesDev = [
@@ -21,7 +20,7 @@ var avdInboundStandardRulesDev = [
       sourcePortRange: '*'
       destinationPortRange: '3389'
       sourceAddressPrefix: 'WindowsVirtualDesktop'
-      destinationAddressPrefix: '10.210.0.0/18'
+      destinationAddressPrefix: '10.100.10.0/21'
       access: 'Allow'
       priority: 500
       direction: 'Inbound'
@@ -38,7 +37,7 @@ var avdInboundStandardRulesProd = [
       sourcePortRange: '*'
       destinationPortRange: '3389'
       sourceAddressPrefix: 'WindowsVirtualDesktop'
-      destinationAddressPrefix: '10.211.0.0/18'
+      destinationAddressPrefix: '10.101.10.0/21'
       access: 'Allow'
       priority: 500
       direction: 'Inbound'
@@ -50,7 +49,7 @@ var vnets = {
   dev: {
     avd: {
       vnetName: toLower('${coreVnetNameNoEnv}-avd-${localenv}')
-      vnetCidr: '10.201.0.0/17'
+      vnetCidr: '10.100.10.0/21'
       dnsServers: dnsSettings
       RG: toUpper('${defaultRGNoEnv}-${localenv}')
       subscriptionID: subscriptions.dev.id
@@ -59,11 +58,29 @@ var vnets = {
       subnets: {
         analyst: {
           name: toLower('${coreSnetNameNoEnv}-avd-analyst-${localenv}')
-          cidr: '10.201.0.0/21'
+          cidr: '10.100.10.0/24'
           nsgName: toLower('${coreNSGNameNoEnv}-avd-analyst-${localenv}')
           nsgSecurityRules: avdInboundStandardRulesDev
-          routeTable: toLower('${coreRTNameNoEnv}-avd-analyst-${localenv}')
-          delegation: []
+        }
+      }
+      peering: []
+    }
+  }
+  prod: {
+    avd: {
+      vnetName: toLower('${coreVnetNameNoEnv}-avd-${localenv}')
+      vnetCidr: '10.101.10.0/21'
+      dnsServers: dnsSettings
+      RG: toUpper('${defaultRGNoEnv}-${localenv}')
+      subscriptionID: subscriptions.prod.id
+      peerOut: true
+      peerIn: true
+      subnets: {
+        analyst: {
+          name: toLower('${coreSnetNameNoEnv}-avd-analyst-${localenv}')
+          cidr: '10.101.10.0/24'
+          nsgName: toLower('${coreNSGNameNoEnv}-avd-analyst-${localenv}')
+          nsgSecurityRules: avdInboundStandardRulesProd
         }
       }
       peering: []
