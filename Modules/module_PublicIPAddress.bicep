@@ -23,7 +23,7 @@ param publicIPType string = 'Dynamic'
   'Global'
   'Regional'
 ])
-param publicIPRegion string = 'Global'
+param publicIPRegion string = 'Regional'
 
 //Create the Public IP Address
 resource PIP 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
