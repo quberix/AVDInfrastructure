@@ -1,6 +1,6 @@
 //Virtual networking for the UDAL DATA VNET
 param localenv string
-param dnsSettings array
+param dnsSettings object
 param subscriptions object
 param orgCode string
 param product string = 'core'
@@ -50,7 +50,7 @@ var vnets = {
     avd: {
       vnetName: toLower('${coreVnetNameNoEnv}-avd-${localenv}')
       vnetCidr: '10.100.10.0/21'
-      dnsServers: dnsSettings
+      dnsServers: dnsSettings[localenv]
       RG: toUpper('${defaultRGNoEnv}-${localenv}')
       subscriptionID: subscriptions.dev.id
       peerOut: true
@@ -70,7 +70,7 @@ var vnets = {
     avd: {
       vnetName: toLower('${coreVnetNameNoEnv}-avd-${localenv}')
       vnetCidr: '10.101.10.0/21'
-      dnsServers: dnsSettings
+      dnsServers: dnsSettings[localenv]
       RG: toUpper('${defaultRGNoEnv}-${localenv}')
       subscriptionID: subscriptions.prod.id
       peerOut: true

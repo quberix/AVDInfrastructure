@@ -64,8 +64,8 @@ var dnsServers = empty(vnetObject.dnsServers) ? [] : vnetObject.dnsServers
 //Create the NSGs for each of the subnets
 //Workaround: A resource is evaluated even if it is not deployed, so it needs to have a name, even one not used.
 @batchSize(1)
-resource NSG 'Microsoft.Network/networkSecurityGroups@2021-02-01'  = [for (subnet,i) in subnetList: if (subnet.value.nsgName != '') {
-  name: subnet.value.nsgName != '' ? subnet.value.nsgName : 'none${i}}'
+resource NSG 'Microsoft.Network/networkSecurityGroups@2022-01-01'  = [for (subnet,i) in subnetList: if (subnet.value.nsgName != '') {
+  name: subnet.value.nsgName != '' ? subnet.value.nsgName : 'none${i}'
   location: location
   tags: tags
   properties: {
@@ -74,7 +74,7 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2021-02-01'  = [for (subne
 }]
 
 //Set up the vnet (deploy if new deployment only)
-resource VNet 'Microsoft.Network/virtualNetworks@2020-06-01' = if (newDeployment) {
+resource VNet 'Microsoft.Network/virtualNetworks@2022-01-01' = if (newDeployment) {
   name: vnetName
   location: location
   tags: tags
@@ -91,10 +91,10 @@ resource VNet 'Microsoft.Network/virtualNetworks@2020-06-01' = if (newDeployment
     subnets: [for (subnet,i) in subnetList: {
       name: subnet.value.name
       properties: {
-        // networkSecurityGroup: subnet.value.nsgName != '' ? {
-        //   location: location
-        //   id: NSG[i].id
-        // } : {}
+        networkSecurityGroup: subnet.value.nsgName != '' ? {
+          location: location
+          id: NSG[i].id
+        } : {}
         addressPrefix: subnet.value.cidr
         privateEndpointNetworkPolicies: 'Disabled'
       }

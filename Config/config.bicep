@@ -46,21 +46,27 @@ var defaultTags = union({
 //List of all subscriptions by environmental reference
 var subscriptions = {
   dev: {
-    name: 'core-dev'
-    id: 'c942a6a9-706e-4827-9cb7-36f38f1aa152'
+    name: 'UDAL Training'
+    id: '7c235ed2-aade-4f4c-a9d3-78f332fb5aee'
   }
   prod: {
-    name: 'core-prod'
-    id: '57bd7e3b-c56c-4195-b0f0-da1a00509a48'
+    name: 'UDAL Training'
+    id: '7c235ed2-aade-4f4c-a9d3-78f332fb5aee'
   }
 }
 
 //DNS Settings for various DNS services.  this will be the DNS IP addresses of any deployed AADDS or AD server
 var dnsServers = {
-  ad: [
-    '10.0.2.4'
-    '10.0.2.5'
-  ]
+  dev: {
+    ad: [
+      '10.100.0.5'
+    ]
+  }
+  prod: {
+    ad: [
+      '10.101.0.5'
+    ]
+  }
 }
 
 // Provides the context and configuration settings for the Private DNS zones beign set up for an internal deployment.  this is where all
@@ -68,40 +74,28 @@ var dnsServers = {
 var privateDNSConfig = {
   blob: {
     name: 'privatelink.blob.${environment().suffixes.storage}'
-    RG: 'UDAL-RG-IDENTITY'
-    subscription: subscriptions.prod.id
     pepGroupID: 'blob'
   }
-  file: {
-    name: 'privatelink.file.${environment().suffixes.storage}'
-    RG: 'UDAL-RG-IDENTITY'
-    subscription: subscriptions.prod.id
-    pepGroupID: 'file'
-  }
-  keyvault: {
-    name: 'privatelink.vaultcore.azure.net'
-    RG: 'UDAL-RG-IDENTITY'
-    subscription: subscriptions.prod.id
-    pepGroupID: 'vault'
-  }
-  web: {
-    name: 'privatelink.azurewebsites.net'
-    RG: 'UDAL-RG-IDENTITY'
-    subscription: subscriptions.prod.id
-    pepGroupID: 'sites'
-  }
-  logicapp: {
-    name: 'privatelink.azurewebsites.net'
-    RG: 'UDAL-RG-IDENTITY'
-    subscription: subscriptions.prod.id
-    pepGroupID: 'sites'
-  }
-  automation: {
-    name: 'privatelink.azure-automation.net'
-    RG: 'UDAL-RG-IDENTITY'
-    subscription: subscriptions.prod.id
-    pepGroupID: 'Webhook'
-  }
+  // file: {
+  //   name: 'privatelink.file.${environment().suffixes.storage}'
+  //   pepGroupID: 'file'
+  // }
+  // keyvault: {
+  //   name: 'privatelink.vaultcore.azure.net'
+  //   pepGroupID: 'vault'
+  // }
+  // web: {
+  //   name: 'privatelink.azurewebsites.net'
+  //   pepGroupID: 'sites'
+  // }
+  // logicapp: {
+  //   name: 'privatelink.azurewebsites.net'
+  //   pepGroupID: 'sites'
+  // }
+  // automation: {
+  //   name: 'privatelink.azure-automation.net'
+  //   pepGroupID: 'Webhook'
+  // }
 }
 
 //Log Analytics Settings
@@ -179,25 +173,25 @@ var coreBastionConfig = {
 
 
 //Core networks
-module CoreVnets 'config_network_core.bicep' = {
+module CoreVnets './Networks/config_network_core.bicep' = {
   name: 'CoreVnets'
   params: {
     localenv: localenv
     orgCode: orgCode
     product: 'core'
-    dnsSettings: dnsServers.ad
+    dnsSettings: dnsServers
     subscriptions: subscriptions
   }
 }
 
 //AVD Networks
-module AVDVnets 'config_network_avd.bicep' = {
+module AVDVnets './Networks/config_network_avd.bicep' = {
   name: 'AVDVnets'
   params: {
     localenv: localenv
     orgCode: orgCode
     product: 'avd'
-    dnsSettings: dnsServers.ad
+    dnsSettings: dnsServers
     subscriptions: subscriptions
   }
 }
