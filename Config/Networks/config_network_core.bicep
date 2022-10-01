@@ -79,4 +79,4 @@ var vnets = {
 
 
 
-output configVnet object = vnets
+output vnets object = vnets

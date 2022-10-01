@@ -167,7 +167,7 @@ module AVDVnets './Networks/config_network_avd.bicep' = {
 
 
 // //Pull all the vnets into a single object
-var vnetConfigs = union(CoreVnets.outputs.configVnet,AVDVnets.outputs.configVnet)
+var vnetConfigs = union(CoreVnets.outputs.vnets,AVDVnets.outputs.vnets)
 
 output tags object = defaultTags
 output common object = commonSettings
@@ -178,7 +178,8 @@ output systemKeyvaults object = systemKeyVaults
 //output adDomainSettings object = adDomainSettings
 output coreBastionConfig object = coreBastionConfig
 output vnetAll object = vnetConfigs
-
+output vnetCore object = CoreVnets.outputs.vnets
+output vnetAVD object = AVDVnets.outputs.vnets
 
 // output roleAssignmentConfig object = roleAssignmentConfig
 // output vnetCore object = CoreVnets.outputs.configVnetCore

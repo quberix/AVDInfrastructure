@@ -19,48 +19,31 @@ param bastionSku string = 'basic'
 @description('Optional: The Vnet to which Bastion subnet is to be configured.  If not configured bastionSubnetID must be configured')
 param bastionVnetName string = ''
 
-@description('Optional: The Subnet CIDR to set up in the associated vnet.  Required if bastionVnetName is configured')
-param bastionSubnetCIDR string = ''
-
-@description('Optional: The subnet ID to which Bastion is to be associated.  If not configured then bastionVnetName/bastionSubnetCIDR must be')
-param bastionSubnetID string = ''
-
 @description('Optional - ID of the Log Analytics service to send debug info to.  Default: none')
 param lawID string = ''
 
 //VARIABLES
-//Get the subnet ID: either it has been specified in params, found from existing subnet in vnet, or newly created subent in vnet
-var subnetID = bastionSubnetID == '' ? ((bastionVnetName != '') && (bastionSubnetCIDR != '') ? BastionSubnetExist.id : BastionSubnet.id ) : bastionSubnetID
 
 //Pull in the existing vnet if bastionVnetName is specified
-resource BastionVnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing = if (bastionVnetName != '') {
+resource BastionVnet 'Microsoft.Network/virtualNetworks@2021-05-01' existing =  {
   name: bastionVnetName
 }
 
-//Create the bastion subnet if the CIDR has been specified
-resource BastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' = if ((bastionVnetName != '') && (bastionSubnetCIDR != '')) {
-  parent: BastionVnet
+//Pull in the subnet
+resource BastionSnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
   name: 'AzureBastionSubnet'
-  properties: {
-    addressPrefix: bastionSubnetCIDR
-  }
+  parent: BastionVnet
 }
 
-//Look up the bastion subnet if only the vnet name is specified
-resource BastionSubnetExist 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' existing = if ((bastionVnetName != '') && (bastionSubnetCIDR == '')) {
-  parent: BastionVnet
-  name: 'AzureBastionSubnet'
-}
-
-resource BastionPIP 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
+//Create the Public IP Address
+module BastionPIP 'module_PublicIPAddress.bicep' = {
   name: bastionPublicIPName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Static'
+  params: {
+    location: location
+    tags: tags
+    publicIPAddressName: bastionPublicIPName
+    publicIPSKU: 'Standard'
+    publicIPType: 'Static'
   }
 }
 
@@ -77,10 +60,10 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2021-05-01' = {
         name: 'IpConf'
         properties: {
           subnet: {
-            id: subnetID
+            id: BastionSnet.id
           }
           publicIPAddress: {
-            id: BastionPIP.id
+            id: BastionPIP.outputs.id
           }
         }
       }

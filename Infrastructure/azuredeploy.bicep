@@ -128,7 +128,7 @@ module Bastion '../Modules/module_Bastion.bicep' = {
     lawID: LogAnalytics.outputs.logAnalyticsID
     bastionHostName: bastionName
     bastionPublicIPName: bastionPIPName
-    
+    bastionVnetName: Config.outputs.vnetCore[localenv][product].vnetName
   }
 }
 
