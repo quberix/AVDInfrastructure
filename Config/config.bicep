@@ -69,35 +69,6 @@ var dnsServers = {
   }
 }
 
-// Provides the context and configuration settings for the Private DNS zones beign set up for an internal deployment.  this is where all
-// Private Endpoints will be registered.
-var privateDNSConfig = {
-  blob: {
-    name: 'privatelink.blob.${environment().suffixes.storage}'
-    pepGroupID: 'blob'
-  }
-  // file: {
-  //   name: 'privatelink.file.${environment().suffixes.storage}'
-  //   pepGroupID: 'file'
-  // }
-  // keyvault: {
-  //   name: 'privatelink.vaultcore.azure.net'
-  //   pepGroupID: 'vault'
-  // }
-  // web: {
-  //   name: 'privatelink.azurewebsites.net'
-  //   pepGroupID: 'sites'
-  // }
-  // logicapp: {
-  //   name: 'privatelink.azurewebsites.net'
-  //   pepGroupID: 'sites'
-  // }
-  // automation: {
-  //   name: 'privatelink.azure-automation.net'
-  //   pepGroupID: 'Webhook'
-  // }
-}
-
 //Log Analytics Settings
 var logAnalytics = {
   dev: {
@@ -116,14 +87,14 @@ var logAnalytics = {
   }
 }
 
-var adDomainSettings = {
-  domainName: domain
-  identityKeyVault: 'coreIdentity'
-  ouPaths: {
-    grouper: 'OU=Grouper,OU=Servers,OU=Environments,DC=udal,DC=nhs,DC=uk'
-    sas: 'OU=SASServer,OU=Servers,OU=Environments,DC=udal,DC=nhs,DC=uk'
-  }
-}
+// var adDomainSettings = {
+//   domainName: domain
+//   identityKeyVault: 'coreIdentity'
+//   ouPaths: {
+//     grouper: 'OU=Grouper,OU=Servers,OU=Environments,DC=udal,DC=nhs,DC=uk'
+//     sas: 'OU=SASServer,OU=Servers,OU=Environments,DC=udal,DC=nhs,DC=uk'
+//   }
+// }
 
 var systemKeyVaults = {
   coreIdentity: {
@@ -205,9 +176,8 @@ output common object = commonSettings
 output subscriptions object = subscriptions
 output logAnalytics object = logAnalytics
 output DNS object = dnsServers
-output privateDNSSettings object = privateDNSConfig
 output systemKeyvaults object = systemKeyVaults
-output adDomainSettings object = adDomainSettings
+//output adDomainSettings object = adDomainSettings
 output coreBastionConfig object = coreBastionConfig
 output vnetAll object = vnetConfigs
 

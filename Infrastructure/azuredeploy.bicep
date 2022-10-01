@@ -41,7 +41,6 @@ var rgName = toUpper('${orgCode}-RG-${product}-${localenv}')
 var kvName = toLower('${orgCode}-kv-${product}-${localenv}')
 var bastionName = toLower('${orgCode}-bastion-${product}-${localenv}')
 var bastionPIPName = toLower('${orgCode}-pip-${product}-${localenv}')
-var privateDNSList = Config.outputs.privateDNSSettings
 
 
 //Variables
@@ -99,31 +98,21 @@ module VnetSnetNSG '../Modules/pattern_Vnet_Subnet_NSG.bicep' = {
   }
 }
 
-//Deploy the full list of Private DNS Zones from the config
-
-module PrivateDNSZones '../Modules/module_PrivateDNS.bicep' =  {
-  name: 'PrivateDNSZones'
-  scope: RG
-  params: {
-    tags: tags
-    privateDNSList: privateDNSList
-  }
-}
 
 // Deploy keyvault
-// module Keyvault '../Modules/module_KeyVault.bicep' = {
-//   name: 'Keyvault'
-//   scope: RG
-//   params: {
-//     location: localenv
-//     tags: tags
-//     lawID: LogAnalytics.outputs.logAnalyticsID
-//     keyVaultName: kvName
-//     enablePurgeProtection: false
-//     enablesoftDelete: false
-//     keyVaultSku: 'standard'
-//   }
-// }
+module Keyvault '../Modules/module_KeyVault.bicep' = {
+  name: 'Keyvault'
+  scope: RG
+  params: {
+    location: localenv
+    tags: tags
+    lawID: LogAnalytics.outputs.logAnalyticsID
+    keyVaultName: kvName
+    enablePurgeProtection: false
+    enablesoftDelete: false
+    keyVaultSku: 'standard'
+  }
+}
 
 //Configure some ACLs for the Keyvault
 //Configure some secrets for the AD server

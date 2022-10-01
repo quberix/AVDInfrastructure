@@ -39,27 +39,9 @@ param hnsEnabled bool = false
 @description('Optional - Days to retain files after delete (soft delete).  Zero turns off soft delete.  Default: 0')
 param softDeleteDays int = 0
 
-@description('Network config for Private endpoint (Common Config->vnet->localenv)')
-param vnetConfig object = {}
-
 @description('Array of vnet/snet ids to allow through the firewall')
 param virtualNetworkRules array = []
 //[{id: vnet/snet}...]
-
-@description('Subnet to deploy endpoint')
-param endpointSnetName string = ''
-
-@description('Optional - DNS config for the local environment where an endpoint is to be added.  Default: {}')
-param dnsConfig object = {}
-
-@description('Optional - Determines whether a Blob endpoint and DNS entry is created')
-param createBlobEndpoint bool = false
-
-@description('Optional - Determines whether a File endpoint and DNS entry is created')
-param createFileEndpoint bool = false
-
-@description('Optional - Determines whether a DFS private endpoint is created')
-param createDFSEndpoint bool = false
 
 @description('Optional - Determine whether this account can be replicated across tenant.  Default: false')
 param allowCrossTenantReplication bool = false
@@ -189,63 +171,7 @@ resource File 'Microsoft.Storage/storageAccounts/fileServices@2021-08-01' = {
   }
 }
 
-//Configure a private endpoint for blob
-module PrivateEndpointBlob 'module_PrivateEndpoint.bicep' = if (createBlobEndpoint) {
-  name: 'privateEndpointBlob'
-  params: {
-    tags: tags
-    location: location
-    privateEndpointName: '${toLower(StorageAcc.name)}-blob-pep-${vnetConfig.vnetName}-${endpointSnetName}'
-    dnsName: StorageAcc.name
-    dnsConfig: dnsConfig
-    vnetConfig: vnetConfig
-    endpointSnetName: endpointSnetName
-    serviceType: 'blob'
-    serviceID: StorageAcc.id
-  }
-  dependsOn: [
-    Container
-  ]
-}
 
-//Configure a private endpoint for file
-module PrivateEndpointFile 'module_PrivateEndpoint.bicep' = if (createFileEndpoint) {
-  name: 'privateEndpointFile'
-  params: {
-    tags: tags
-    location: location
-    privateEndpointName: '${toLower(StorageAcc.name)}-file-pep-${vnetConfig.vnetName}-${endpointSnetName}'
-    dnsName: StorageAcc.name
-    dnsConfig: dnsConfig
-    vnetConfig: vnetConfig
-    endpointSnetName: endpointSnetName
-    serviceType: 'file'
-    serviceID: StorageAcc.id
-  }
-  dependsOn: [
-    File
-    PrivateEndpointBlob
-  ]
-}
-
-//Configure a private endpoint for file
-module PrivateEndpointDFS 'module_PrivateEndpoint.bicep' = if (createDFSEndpoint) {
-  name: 'privateEndpointDFS'
-  params: {
-    tags: tags
-    location: location
-    privateEndpointName: '${toLower(StorageAcc.name)}-dfs-pep-${vnetConfig.vnetName}-${endpointSnetName}'
-    dnsName: StorageAcc.name
-    dnsConfig: dnsConfig
-    vnetConfig: vnetConfig
-    endpointSnetName: endpointSnetName
-    serviceType: 'dfs'
-    serviceID: StorageAcc.id
-  }
-  dependsOn: [
-    PrivateEndpointFile
-  ]
-}
 
 //Add to log analytics if provided ID
 resource StorageAccLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(lawID)) {
@@ -265,9 +191,6 @@ resource StorageAccLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
     ]
     logs: []
   }
-  dependsOn: [
-    PrivateEndpointDFS
-  ]
 }
 
 resource BlobLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (!empty(lawID)) {

@@ -64,19 +64,8 @@ param enablesoftDelete bool = false
 @description('Create a private endpoint')
 param deployPrivateEndpoint bool = false
 
-@description('Network config for Private endpoint (Common Config->vnet->localenv)')
-param vnetConfig object = {}
-
-@description('Subnet to deploy endpoint')
-param endpointSnetName string = ''
-
-@description('Optional - DNS config for the local environment where an endpoint is to be added.  Default: {}')
-param dnsConfig object = {}
-
 //VARIABLES
 var publicNetworkAccess = deployPrivateEndpoint ? 'disabled' : 'enabled'
-var vaultPepName = '${keyVaultName}-pep-${vnetConfig.vnetName}-${endpointSnetName}'
-
 
 //RESOURCES
 //Build the keyvault
@@ -104,23 +93,6 @@ resource Vault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       ipRules: networkIPPermit
       virtualNetworkRules: networkIDsPermit
     }
-  }
-}
-
-//If specified, configure a private endpoint
-
-module VaultPrivateEndpoint 'module_PrivateEndpoint.bicep' = if (deployPrivateEndpoint) {
-  name: 'vaultPrivateEndpoint'
-  params: {
-    tags: tags
-    location: location
-    privateEndpointName: vaultPepName
-    dnsName: Vault.name
-    dnsConfig: dnsConfig
-    vnetConfig: vnetConfig
-    endpointSnetName: endpointSnetName
-    serviceType: 'keyvault'
-    serviceID: Vault.id
   }
 }
 
