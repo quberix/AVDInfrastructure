@@ -1,5 +1,4 @@
 //Virtual networking for the UDAL DATA VNET
-param localenv string
 param dnsSettings object
 param subscriptions object
 param orgCode string
@@ -48,18 +47,18 @@ var avdInboundStandardRulesProd = [
 var vnets = {
   dev: {
     avd: {
-      vnetName: toLower('${coreVnetNameNoEnv}-avd-${localenv}')
+      vnetName: toLower('${coreVnetNameNoEnv}-avd-dev')
       vnetCidr: '10.100.10.0/21'
-      dnsServers: dnsSettings[localenv]
-      RG: toUpper('${defaultRGNoEnv}-${localenv}')
+      dnsServers: dnsSettings.dev.ad
+      RG: toUpper('${defaultRGNoEnv}-dev')
       subscriptionID: subscriptions.dev.id
       peerOut: true
       peerIn: true
       subnets: {
         analyst: {
-          name: toLower('${coreSnetNameNoEnv}-avd-analyst-${localenv}')
+          name: toLower('${coreSnetNameNoEnv}-avd-analyst-dev')
           cidr: '10.100.10.0/24'
-          nsgName: toLower('${coreNSGNameNoEnv}-avd-analyst-${localenv}')
+          nsgName: toLower('${coreNSGNameNoEnv}-avd-analyst-dev')
           nsgSecurityRules: avdInboundStandardRulesDev
         }
       }
@@ -68,18 +67,18 @@ var vnets = {
   }
   prod: {
     avd: {
-      vnetName: toLower('${coreVnetNameNoEnv}-avd-${localenv}')
+      vnetName: toLower('${coreVnetNameNoEnv}-avd-prod')
       vnetCidr: '10.101.10.0/21'
-      dnsServers: dnsSettings[localenv]
-      RG: toUpper('${defaultRGNoEnv}-${localenv}')
+      dnsServers: dnsSettings.prod.ad
+      RG: toUpper('${defaultRGNoEnv}-prod')
       subscriptionID: subscriptions.prod.id
       peerOut: true
       peerIn: true
       subnets: {
         analyst: {
-          name: toLower('${coreSnetNameNoEnv}-avd-analyst-${localenv}')
+          name: toLower('${coreSnetNameNoEnv}-avd-analyst-prod')
           cidr: '10.101.10.0/24'
-          nsgName: toLower('${coreNSGNameNoEnv}-avd-analyst-${localenv}')
+          nsgName: toLower('${coreNSGNameNoEnv}-avd-analyst-prod')
           nsgSecurityRules: avdInboundStandardRulesProd
         }
       }

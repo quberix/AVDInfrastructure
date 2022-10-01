@@ -147,7 +147,6 @@ var coreBastionConfig = {
 module CoreVnets './Networks/config_network_core.bicep' = {
   name: 'CoreVnets'
   params: {
-    localenv: localenv
     orgCode: orgCode
     product: 'core'
     dnsSettings: dnsServers
@@ -159,7 +158,6 @@ module CoreVnets './Networks/config_network_core.bicep' = {
 module AVDVnets './Networks/config_network_avd.bicep' = {
   name: 'AVDVnets'
   params: {
-    localenv: localenv
     orgCode: orgCode
     product: 'avd'
     dnsSettings: dnsServers

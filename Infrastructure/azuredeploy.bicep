@@ -104,7 +104,7 @@ module Keyvault '../Modules/module_KeyVault.bicep' = {
   name: 'Keyvault'
   scope: RG
   params: {
-    location: localenv
+    location: location
     tags: tags
     lawID: LogAnalytics.outputs.logAnalyticsID
     keyVaultName: kvName
@@ -119,17 +119,17 @@ module Keyvault '../Modules/module_KeyVault.bicep' = {
 
 
 // Deploy Bastion
-// module Bastion '../Modules/module_Bastion.bicep' = {
-//   name: 'Bastion'
-//   scope: RG
-//   params: {
-//     location: location
-//     tags: tags
-//     lawID: LogAnalytics.outputs.logAnalyticsID
-//     bastionHostName: bastionName
-//     bastionPublicIPName: bastionPIPName
+module Bastion '../Modules/module_Bastion.bicep' = {
+  name: 'Bastion'
+  scope: RG
+  params: {
+    location: location
+    tags: tags
+    lawID: LogAnalytics.outputs.logAnalyticsID
+    bastionHostName: bastionName
+    bastionPublicIPName: bastionPIPName
     
-//   }
-// }
+  }
+}
 
 // Deploy VM based AD server
