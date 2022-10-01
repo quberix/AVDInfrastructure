@@ -14,7 +14,11 @@ param bastionHostName string
 param bastionPublicIPName string
 
 @description('Name of the bastion public ip address')
-param bastionSku string = 'basic'
+@allowed([
+  'Basic'
+  'Standard'
+])
+param bastionSku string = 'Basic'
 
 @description('Optional: The Vnet to which Bastion subnet is to be configured.  If not configured bastionSubnetID must be configured')
 param bastionVnetName string = ''
