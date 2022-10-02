@@ -24,12 +24,12 @@ param vmSize string = 'Standard_B2s'
 @description('References to either an image library image or standard vm image')
 param vmImageObject object
 //Configured as either:
-// imageReference: {
+// {
 //   id: sharedImageGalleryPath
 //   version: specific version name (optional)
 // }
 // OR
-// imageReference: {
+// {
 //   offer: offerName
 //   publisher: publisherName
 //   sku: skuName

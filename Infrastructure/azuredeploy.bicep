@@ -143,9 +143,7 @@ module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
     vmAdminName: 'testuser'
     vmAdminPassword: 'test!!!123test'
     vmSize: Config.outputs.adDomainSettings.domainServerVM.size
-    vmImageObject: {
-      imageReference: Config.outputs.adDomainSettings.domainServerVM.imageRef
-    }
+    vmImageObject: Config.outputs.adDomainSettings.domainServerVM.imageRef
     vnetConfig: Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
     snetName: Config.outputs.adDomainSettings.snetConfigID
     diagObject: Config.outputs.logAnalytics[localenv]
