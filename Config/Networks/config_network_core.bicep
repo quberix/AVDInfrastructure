@@ -18,17 +18,14 @@ module ADServerNSGRules '../NSGRules/nsg_rules_AD.bicep' = {
   name: 'ADServerNSGRules'
 }
 
-module PEPADServiceNSGRules '../NSGRules/nsg_rules_Endpoints.bicep' = {
-  name: 'PEPServiceNSGRules'
-}
-
 
 var vnets = {
   dev: {
     '${product}': {
       vnetName: toLower('${coreVnetNameNoEnv}-dev')
       vnetCidr: '10.100.0.0/24'
-      dnsServers: dnsSettings.dev.ad
+      //dnsServers: dnsSettings.dev.ad
+      dnsServers: []  //DNS servers are set to none, as we need AD up and running for the DNS service to work
       RG: toUpper('${defaultRGNoEnv}-dev')
       subscriptionID: subscriptions.dev.id
       peerOut: true
@@ -58,7 +55,8 @@ var vnets = {
     '${product}': {
       vnetName: toLower('${coreVnetNameNoEnv}-prod')
       vnetCidr: '10.101.0.0/24'
-      dnsServers: dnsSettings.prod.ad
+      //dnsServers: dnsSettings.prod.ad
+      dnsServers: []  //DNS servers are set to none, as we need AD up and running for the DNS service to work
       rg: toUpper('${defaultRGNoEnv}-prod')
       subscriptionID: subscriptions.dev.id
       peerOut: true

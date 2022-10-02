@@ -74,25 +74,25 @@ resource NSG 'Microsoft.Network/networkSecurityGroups@2022-01-01'  = [for (subne
   }
 }]
 
-@batchSize(1)
-resource RT 'Microsoft.Network/routeTables@2022-01-01'  = [for (subnet,i) in subnetList: if (subnet.value.routeTable != '') {
-  name: subnet.value.routeTable != '' ? subnet.value.routeTable : 'none${i}'
-  location: location
-  tags: tags
-  properties: {
-    routes: [
-      {
-        name: udrRouteName
-        properties: {
-          addressPrefix: addressPrefix
-          nextHopType: nextHopType
-          nextHopIpAddress: nextHopIPAddress != '' ? nextHopIPAddress : json('null')
-        }
-      }
-    ]
-    disableBgpRoutePropagation: disableBgpRoutePropagation
-  }
-}]
+// @batchSize(1)
+// resource RT 'Microsoft.Network/routeTables@2022-01-01'  = [for (subnet,i) in subnetList: if (subnet.value.routeTable != '') {
+//   name: subnet.value.routeTable != '' ? subnet.value.routeTable : 'none${i}'
+//   location: location
+//   tags: tags
+//   properties: {
+//     routes: [
+//       {
+//         name: udrRouteName
+//         properties: {
+//           addressPrefix: addressPrefix
+//           nextHopType: nextHopType
+//           nextHopIpAddress: nextHopIPAddress != '' ? nextHopIPAddress : json('null')
+//         }
+//       }
+//     ]
+//     disableBgpRoutePropagation: disableBgpRoutePropagation
+//   }
+// }]
 
 //Set up the vnet (deploy if new deployment only)
 resource VNet 'Microsoft.Network/virtualNetworks@2022-01-01' = if (newDeployment) {
