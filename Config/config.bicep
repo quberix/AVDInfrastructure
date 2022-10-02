@@ -94,7 +94,7 @@ var adDomainSettings = {
   domainAdminUserKVKey: 'domainAdminUser'
   domainAdminPasswordKVKey: 'domainAdminPassword'
   domainServerVM: {
-    nameVMObjectNoEnv: toLower('${orgCode}-vm-adserver-dev')
+    nameVMObjectNoEnv: toLower('${orgCode}-vm-adserver')
     nameVMNoEnv: toLower('${orgCode}ADS1')
     imageRef: {
       offer: 'WindowsServer'

@@ -40,7 +40,7 @@ param tags object = { }
 var rgName = toUpper('${orgCode}-RG-${product}-${localenv}')
 var bastionName = toLower('${orgCode}-bastion-${product}-${localenv}')
 var bastionPIPName = toLower('${orgCode}-pip-${product}-${localenv}')
-
+var rtName = toLower('${orgCode}-rt-${product}-${localenv}')
 
 //Variables
 var defaultTags = union({
@@ -131,7 +131,22 @@ module Bastion '../Modules/module_Bastion.bicep' = {
   }
 }
 
+//Deploy Route Table for the AD Server snet
+module RouteTable '../Modules/module_UserDefinedRoute.bicep' = {
+  name: 'RouteTable'
+  scope: RG
+  params: {
+    location: location
+    tags: tags
+    udrName: rtName
+    udrRouteName: 'internet'
+    nextHopType: 'Internet'
+    addressPrefix: '0.0.0.0/0'
+  }
+}
+
 // Deploy VM based AD server
+var vnetConfig = Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
 module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
   name: 'ADServer'
   scope: RG
@@ -144,9 +159,8 @@ module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
     vmAdminPassword: 'test!!!123test'
     vmSize: Config.outputs.adDomainSettings.domainServerVM.size
     vmImageObject: Config.outputs.adDomainSettings.domainServerVM.imageRef
-    vnetConfig: Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
-    snetName: Config.outputs.adDomainSettings.snetConfigID
+    vnetConfig: vnetConfig
+    snetName: vnetConfig.subnets[Config.outputs.adDomainSettings.snetConfigID].name
     diagObject: Config.outputs.logAnalytics[localenv]
-
   }
 }
