@@ -54,7 +54,7 @@ var vnets = {
       vnetName: toLower('${coreVnetNameNoEnv}-prod')
       vnetCidr: '10.101.0.0/24'
       dnsServers: dnsSettings.prod.ad
-      RG: toUpper('${defaultRGNoEnv}-prod')
+      rg: toUpper('${defaultRGNoEnv}-prod')
       subscriptionID: subscriptions.dev.id
       peerOut: true
       peerIn: true

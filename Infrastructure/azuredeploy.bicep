@@ -38,7 +38,6 @@ param tags object = { }
 
 //Vars - Resource group names
 var rgName = toUpper('${orgCode}-RG-${product}-${localenv}')
-var kvName = toLower('${orgCode}-kv-${product}-${localenv}')
 var bastionName = toLower('${orgCode}-bastion-${product}-${localenv}')
 var bastionPIPName = toLower('${orgCode}-pip-${product}-${localenv}')
 
@@ -81,7 +80,7 @@ module LogAnalytics '../Modules/module_LogAnalytics.bicep' = {
   params: {
     location: location
     tags: tags
-    laName: toLower('${orgCode}-law-${product}-${localenv}')
+    laName: Config.outputs.logAnalytics[localenv].name
   }
 }
 
@@ -107,7 +106,7 @@ module Keyvault '../Modules/module_KeyVault.bicep' = {
     location: location
     tags: tags
     lawID: LogAnalytics.outputs.logAnalyticsID
-    keyVaultName: kvName
+    keyVaultName: Config.outputs.systemKeyvaults[localenv].coreIdentity.name
     enablePurgeProtection: false
     enablesoftDelete: false
     keyVaultSku: 'standard'
@@ -115,7 +114,7 @@ module Keyvault '../Modules/module_KeyVault.bicep' = {
 }
 
 //Configure some ACLs for the Keyvault
-//Configure some secrets for the AD server
+//Configure some secrets for the AD server - local admin user and password, domain admin user and password
 
 
 // Deploy Bastion
@@ -133,3 +132,23 @@ module Bastion '../Modules/module_Bastion.bicep' = {
 }
 
 // Deploy VM based AD server
+module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
+  name: 'ADServer'
+  scope: RG
+  params: {
+    location: location
+    tags: tags
+    vmName: toLower('${Config.outputs.adDomainSettings.domainServerVM.nameVMObjectNoEnv}${localenv}')
+    vmComputerName: toUpper('${Config.outputs.adDomainSettings.domainServerVM.nameVMNoEnv}${localenv}')
+    vmAdminName: 'testuser'
+    vmAdminPassword: 'test!!!123test'
+    vmSize: Config.outputs.adDomainSettings.domainServerVM.size
+    vmImageObject: {
+      imageReference: Config.outputs.adDomainSettings.domainServerVM.imageRef
+    }
+    vnetConfig: Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
+    snetName: Config.outputs.adDomainSettings.snetConfigID
+    diagObject: Config.outputs.logAnalytics[localenv]
+
+  }
+}

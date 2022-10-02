@@ -72,35 +72,56 @@ var dnsServers = {
 //Log Analytics Settings
 var logAnalytics = {
   dev: {
-    rg: toUpper('${orgCode}-RG-DIAGLOGS-DEV')
-    name: toLower('${orgCode}-law-infrastructure-dev')
-    storageName: toLower('${orgCode}stinfracorediagdev')
-    aaAccountName: toLower('${orgCode}-aa-infrastructure-dev')
+    rg: toUpper('${orgCode}-RG-CORE-DEV')
+    name: toLower('${orgCode}-law-core-dev')
+    storageName: toLower('${orgCode}stcorediagdev')
     subscription: subscriptions.dev.id
-    solutions: 'Updates,ChangeTracking,AntiMalware,Security,SecurityCenterFree,KeyVaultAnalytics,NetworkMonitoring,VMInsights'
   }
   prod: {
-    rg: toUpper('${orgCode}-RG-DIAGLOGS-PROD')
-    name: toLower('${orgCode}-law-infrastructure-prod')
-    storageName: toLower('${orgCode}stinfracorediagprod')
+    rg: toUpper('${orgCode}-RG-CORE-PROD')
+    name: toLower('${orgCode}-law-core-prod')
+    storageName: toLower('${orgCode}stcorediagprod')
     subscription: subscriptions.prod.id
   }
 }
 
-// var adDomainSettings = {
-//   domainName: domain
-//   identityKeyVault: 'coreIdentity'
-//   ouPaths: {
-//     grouper: 'OU=Grouper,OU=Servers,OU=Environments,DC=udal,DC=nhs,DC=uk'
-//     sas: 'OU=SASServer,OU=Servers,OU=Environments,DC=udal,DC=nhs,DC=uk'
-//   }
-// }
+var adDomainSettings = {
+  domainName: domain
+  domainNameShort: toUpper(orgCode)
+  identityKeyVault: 'coreIdentity'
+  localAdminUserKVKey: 'localAdminUsername'
+  localAdminPasswordKVKey: 'localAdminPassword'
+  domainAdminUserKVKey: 'domainAdminUser'
+  domainAdminPasswordKVKey: 'domainAdminPassword'
+  domainServerVM: {
+    nameVMObjectNoEnv: toLower('${orgCode}-vm-adserver-dev')
+    nameVMNoEnv: toLower('${orgCode}ADS1')
+    imageRef: {
+      offer: 'WindowsServer'
+        publisher: 'MicrosoftWindowsServer'
+        sku: '2022-datacenter-azure-edition'
+        version: 'latest'
+    }
+    size: 'Standard_B2s'
+  }
+  vnetConfigID: 'core'
+  snetConfigID: 'adserver'
+}
 
 var systemKeyVaults = {
-  coreIdentity: {
-    name: toLower('${orgCode}-kv-identity')
-    subscription: subscriptions.prod.id
-    RG: toUpper('${orgCode}-RG-IDENTITY')
+  dev: {
+    coreIdentity: {
+      name: toLower('${orgCode}-kv-identity-dev')
+      subscription: subscriptions.dev.id
+      RG: toUpper('${orgCode}-RG-CORE-DEV')
+    }
+  }
+  prod: {
+    coreIdentity: {
+      name: toLower('${orgCode}-kv-identity-prod')
+      subscription: subscriptions.prod.id
+      RG: toUpper('${orgCode}-RG-CORE-PROD')
+    }
   }
 }
 
@@ -175,7 +196,7 @@ output subscriptions object = subscriptions
 output logAnalytics object = logAnalytics
 output DNS object = dnsServers
 output systemKeyvaults object = systemKeyVaults
-//output adDomainSettings object = adDomainSettings
+output adDomainSettings object = adDomainSettings
 output coreBastionConfig object = coreBastionConfig
 output vnetAll object = vnetConfigs
 output vnetCore object = CoreVnets.outputs.vnets
