@@ -39,7 +39,7 @@ param tags object = { }
 //Vars - Resource group names
 var rgName = toUpper('${orgCode}-RG-${product}-${localenv}')
 var bastionName = toLower('${orgCode}-bastion-${product}-${localenv}')
-var bastionPIPName = toLower('${orgCode}-pip-${product}-${localenv}')
+var bastionPIPName = toLower('${orgCode}-bastion-pip-${product}-${localenv}')
 var rtName = toLower('${orgCode}-rt-${product}-${localenv}')
 
 //Variables
@@ -131,9 +131,11 @@ module Bastion '../Modules/module_Bastion.bicep' = {
   }
 }
 
-//Deploy Route Table for the AD Server snet
-module RouteTable '../Modules/module_UserDefinedRoute.bicep' = {
-  name: 'RouteTable'
+var vnetConfig = Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
+
+//Deploy a route table with route to the internet
+module RouteTableInternet '../Modules/module_UserDefinedRoute.bicep' = {
+  name: 'RouteTableInternet'
   scope: RG
   params: {
     location: location
@@ -145,22 +147,37 @@ module RouteTable '../Modules/module_UserDefinedRoute.bicep' = {
   }
 }
 
-// Deploy VM based AD server
-var vnetConfig = Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
-module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
-  name: 'ADServer'
+//Apply the Route table to the AD Subnet
+module RouteTableADSnet '../Modules/module_UserDefinedRoute_Apply.bicep' = {
+  name: 'RouteTableADSnet'
   scope: RG
   params: {
-    location: location
-    tags: tags
-    vmName: toLower('${Config.outputs.adDomainSettings.domainServerVM.nameVMObjectNoEnv}${localenv}')
-    vmComputerName: toUpper('${Config.outputs.adDomainSettings.domainServerVM.nameVMNoEnv}${localenv}')
-    vmAdminName: 'testuser'
-    vmAdminPassword: 'test!!!123test'
-    vmSize: Config.outputs.adDomainSettings.domainServerVM.size
-    vmImageObject: Config.outputs.adDomainSettings.domainServerVM.imageRef
-    vnetConfig: vnetConfig
-    snetName: vnetConfig.subnets[Config.outputs.adDomainSettings.snetConfigID].name
-    diagObject: Config.outputs.logAnalytics[localenv]
+    udrID: RouteTableInternet.outputs.udrID
+    vnetName: vnetConfig.vnetName
+    subnetName: vnetConfig.subnets[Config.outputs.adDomainSettings.snetConfigID].name
+    subnetCidr: vnetConfig.subnets[Config.outputs.adDomainSettings.snetConfigID].cidr
+    
   }
 }
+
+// Deploy VM based AD server
+// module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
+//   name: 'ADServer'
+//   scope: RG
+//   params: {
+//     location: location
+//     tags: tags
+//     vmName: toLower('${Config.outputs.adDomainSettings.domainServerVM.nameVMObjectNoEnv}${localenv}')
+//     vmComputerName: toUpper('${Config.outputs.adDomainSettings.domainServerVM.nameVMNoEnv}${localenv}')
+//     vmAdminName: 'testuser'
+//     vmAdminPassword: 'test!!!123test'
+//     vmSize: Config.outputs.adDomainSettings.domainServerVM.size
+//     vmImageObject: Config.outputs.adDomainSettings.domainServerVM.imageRef
+//     vnetConfig: vnetConfig
+//     snetName: vnetConfig.subnets[Config.outputs.adDomainSettings.snetConfigID].name
+//     diagObject: Config.outputs.logAnalytics[localenv]
+//   }
+//   dependsOn: [
+//     RouteTableADSnet
+//   ]
+// }

@@ -2,7 +2,7 @@
 
 var adSnetStandardInboundRules = [
   {
-    name: 'AllowRPCEndpointMapper'
+    name: 'AllowRPCEndpointMapperInbound'
     properties: {
       protocol: 'TCP'
       sourcePortRange: '*'
@@ -15,7 +15,7 @@ var adSnetStandardInboundRules = [
     }
   }
   {
-    name: 'AllowLDAP'
+    name: 'AllowLDAPInbound'
     properties: {
       protocol: '*'
       sourcePortRange: '*'
@@ -31,7 +31,7 @@ var adSnetStandardInboundRules = [
     }
   }
   {
-    name: 'AllowGlobalCatalogue'
+    name: 'AllowGlobalCatalogueInbound'
     properties: {
       protocol: 'TCP'
       sourcePortRange: '*'
@@ -47,7 +47,7 @@ var adSnetStandardInboundRules = [
     }
   }
   {
-    name: 'AllowKerberos'
+    name: 'AllowKerberosInbound'
     properties: {
       protocol: '*'
       sourcePortRange: '*'
@@ -63,7 +63,7 @@ var adSnetStandardInboundRules = [
     }
   }
   {
-    name: 'AllowDNS'
+    name: 'AllowDNSInbound'
     properties: {
       protocol: '*'
       sourcePortRange: '*'
@@ -76,7 +76,7 @@ var adSnetStandardInboundRules = [
     }
   }
   {
-    name: 'AllowSMB'
+    name: 'AllowSMBInbound'
     properties: {
       protocol: 'TCP'
       sourcePortRange: '*'
@@ -89,7 +89,7 @@ var adSnetStandardInboundRules = [
     }
   }
   {
-    name: 'AllowW32Time'
+    name: 'AllowW32TimeInbound'
     properties: {
       protocol: 'UDP'
       sourcePortRange: '*'
@@ -101,6 +101,49 @@ var adSnetStandardInboundRules = [
       direction: 'Inbound'
     }
   }
+  {
+    name: 'AllowRDPInbound'
+    properties: {
+      protocol: 'TCP'
+      sourcePortRange: '*'
+      destinationPortRange: '3389'
+      sourceAddressPrefix: 'VirtualNetwork'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 200
+      direction: 'Inbound'
+    }
+  }
+]
+
+var adSnetStandardOutboundRules = [
+  {
+    name: 'AllowRDPOutbound'
+    properties: {
+      protocol: 'TCP'
+      sourcePortRange: '*'
+      destinationPortRange: '3389'
+      sourceAddressPrefix: 'VirtualNetwork'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 200
+      direction: 'Outbound'
+    }
+  }
+  {
+    name: 'AllowKMSOutbound'
+    properties: {
+      protocol: 'TCP'
+      sourcePortRange: '*'
+      destinationPortRange: '1688'
+      sourceAddressPrefix: 'VirtualNetwork'
+      destinationAddressPrefix: '*'
+      access: 'Allow'
+      priority: 210
+      direction: 'Outbound'
+    }
+  }
 ]
 
 output inbound array = adSnetStandardInboundRules
+output outbound array = adSnetStandardOutboundRules

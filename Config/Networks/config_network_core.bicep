@@ -8,6 +8,7 @@ var defaultRGNoEnv = '${orgCode}-RG-${product}'
 var coreVnetNameNoEnv = '${orgCode}-vnet-${product}'
 var coreSnetNameNoEnv = '${orgCode}-snet-${product}'
 var coreNSGNameNoEnv = '${orgCode}-nsg-${product}'
+var coreNSGRTNoEnv = '${orgCode}-rt-${product}'
 
 module BastionNSGRules '../NSGRules/nsgrules_Bastion.bicep' = {
   name: 'BastionNSGRules'
@@ -37,12 +38,16 @@ var vnets = {
           name: toLower('${coreSnetNameNoEnv}-adserver-dev')
           cidr: '10.100.0.0/26'
           nsgName: toLower('${coreNSGNameNoEnv}-adserver-dev')
+          routeTable: {
+            name: toLower('${coreNSGRTNoEnv}-adserver-dev')
+          }
           nsgSecurityRules: ADServerNSGRules.outputs.inbound
         }
         bastion: {
           name: 'AzureBastionSubnet'
           cidr: '10.100.0.128/26'
           nsgName: toLower('${coreNSGNameNoEnv}-bastion-dev')
+          routeTable: ''
           nsgSecurityRules: BastionNSGRules.outputs.all
         }
       }
@@ -63,12 +68,14 @@ var vnets = {
           name: toLower('${coreSnetNameNoEnv}-adserver-prod')
           cidr: '10.101.0.0/26'
           nsgName: toLower('${coreNSGNameNoEnv}-adserver-prod')
-          nsgSecurityRules: []
+          routeTable: toLower('${coreNSGRTNoEnv}-adserver-prod')
+          nsgSecurityRules: ADServerNSGRules.outputs.inbound
         }
         bastion: {
           name: 'AzureBastionSubnet'
           cidr: '10.101.0.128/26'
           nsgName: toLower('${coreNSGNameNoEnv}-bastion-prod')
+          routeTable: ''
           nsgSecurityRules: BastionNSGRules.outputs.all
         }
       }
