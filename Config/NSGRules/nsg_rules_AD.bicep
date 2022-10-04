@@ -114,6 +114,20 @@ var adSnetStandardInboundRules = [
       direction: 'Inbound'
     }
   }
+  {
+    name: 'DenyAllInbound'
+    properties: {
+      description: 'Deny all rule across all ports, addresses and protocols'
+      protocol: '*'
+      sourcePortRange: '*'
+      destinationPortRange: '*'
+      sourceAddressPrefix: '*'
+      destinationAddressPrefix: '*'
+      access: 'Deny'
+      priority: 900
+      direction: 'Inbound'
+    }
+  }
 ]
 
 var adSnetStandardOutboundRules = [

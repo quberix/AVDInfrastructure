@@ -59,12 +59,12 @@ var subscriptions = {
 var dnsServers = {
   dev: {
     ad: [
-      '10.100.0.5'
+      '10.100.0.5'    //The VM running AD and the DNS services will be given this fixed IP address
     ]
   }
   prod: {
     ad: [
-      '10.101.0.5'
+      '10.101.0.5'    //The VM running AD and the DNS services will be given this fixed IP address
     ]
   }
 }
@@ -104,7 +104,7 @@ var adDomainSettings = {
     }
     size: 'Standard_B2s'
   }
-  vnetConfigID: 'core'
+  vnetConfigID: 'adserver'
   snetConfigID: 'adserver'
 }
 
@@ -164,9 +164,19 @@ var coreBastionConfig = {
 //Default NSG Rules
 
 
+//AD Server
+module ADServerVnet './Networks/config_network_adserver.bicep' = {
+  name: 'ADServerVnet'
+  params: {
+    orgCode: orgCode
+    product: 'adserver'
+    subscriptions: subscriptions
+  }
+}
+
 //Core networks
-module CoreVnets './Networks/config_network_core.bicep' = {
-  name: 'CoreVnets'
+module CoreVnet './Networks/config_network_core.bicep' = {
+  name: 'CoreVnet'
   params: {
     orgCode: orgCode
     product: 'core'
@@ -188,7 +198,7 @@ module AVDVnets './Networks/config_network_avd.bicep' = {
 
 
 // //Pull all the vnets into a single object
-var vnetConfigs = union(CoreVnets.outputs.vnets,AVDVnets.outputs.vnets)
+var vnetConfigs = union(ADServerVnet.outputs.vnets,CoreVnet.outputs.vnets,AVDVnets.outputs.vnets)
 
 output tags object = defaultTags
 output common object = commonSettings
@@ -199,7 +209,8 @@ output systemKeyvaults object = systemKeyVaults
 output adDomainSettings object = adDomainSettings
 output coreBastionConfig object = coreBastionConfig
 output vnetAll object = vnetConfigs
-output vnetCore object = CoreVnets.outputs.vnets
+output vnetADServer object = ADServerVnet.outputs.vnets
+output vnetCore object = CoreVnet.outputs.vnets
 output vnetAVD object = AVDVnets.outputs.vnets
 
 // output roleAssignmentConfig object = roleAssignmentConfig

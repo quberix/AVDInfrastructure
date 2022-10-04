@@ -21,6 +21,7 @@ $localConfig = Get_Environment_Config $localenv
 
 $deployedRGs = @(
     ("$($localConfig.orgCode)-RG-CORE-$localenv").ToUpper()
+    ("$($localConfig.orgCode)-RG-ADSERVER-$localenv").ToUpper()
 )
 
 #Login to azure

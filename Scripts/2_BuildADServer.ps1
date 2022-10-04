@@ -31,11 +31,11 @@ az account set --subscription $localConfig.subscriptionName
 
 #Deploy the resources either live or as a Dry Run
 if ($dryrun -ne $true) {
-    Write-Host "Running the Infrastructure Build - Deploying Resources" -ForegroundColor Yellow
-    az deployment sub create --location $localConfig.location --template-file "../Infrastructure/azuredeploy.bicep" --parameters localenv=$localenv --verbose
+    Write-Host "Running the AD Server Build - Deploying Resources" -ForegroundColor Yellow
+    az deployment sub create --location $localConfig.location --template-file "../Server_AD/azuredeploy.bicep" --parameters localenv=$localenv --verbose
 } else {
-    Write-Host "Running the Infrastructure Build - Dry-Run mode" -ForegroundColor Green
-    az deployment sub create --location $localConfig.location --template-file "../Infrastructure/azuredeploy.bicep" --parameters localenv=$localenv --verbose --what-if
+    Write-Host "Running the AD Server Build - Dry-Run mode" -ForegroundColor Green
+    az deployment sub create --location $localConfig.location --template-file "../Server_AD/azuredeploy.bicep" --parameters localenv=$localenv --verbose --what-if
 }
 
 

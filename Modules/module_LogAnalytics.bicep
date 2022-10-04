@@ -24,3 +24,4 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
 
 output logAnalyticsID string = logAnalytics.id
 output logAnalyticsName string = logAnalytics.name
+output logAnalyticsCustomerID string = logAnalytics.properties.customerId

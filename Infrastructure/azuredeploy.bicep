@@ -34,22 +34,15 @@ param orgCode string = 'qbx'
 param product string = 'core'
 
 @description('Default Tags to apply')
-param tags object = { }
+param additionalTags object = { }
 
-//Vars - Resource group names
+//VARIABLES
 var rgName = toUpper('${orgCode}-RG-${product}-${localenv}')
 var bastionName = toLower('${orgCode}-bastion-${product}-${localenv}')
 var bastionPIPName = toLower('${orgCode}-bastion-pip-${product}-${localenv}')
-var rtName = toLower('${orgCode}-rt-${product}-${localenv}')
+//var rtName = toLower('${orgCode}-rt-${product}-${localenv}')
 
-//Variables
-var defaultTags = union({
-  Environment: toUpper(localenv)
-  Application: toUpper('${organisation} ${product}')
-  Owner: toUpper('NHSE - ${organisation} - ${product}')
-  Product: toUpper(product)
-  Criticality: localenv == 'prod' ? 'Tier 1' : 'Tier 2'
- }, tags)
+var tags = Config.outputs.tags
 
 
 //RESOURCES
@@ -57,7 +50,7 @@ var defaultTags = union({
 resource RG 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: rgName
   location: location
-  tags: defaultTags
+  //tags: defaultTags
 }
 
 //Pull in the Config - can't do this earlier unfortunatly as it needs to be drawn in again an existing RG
@@ -70,6 +63,18 @@ module Config '../Config/config.bicep'= {
     organisation: organisation
     orgCode: orgCode
     product: product
+    additionalTags: additionalTags
+  }
+}
+
+//Update the RG tags because we cannot do that in its initial deployment as we need to deploy
+//the config module against the RG and the config module contains the tag content
+module RGTag '../Modules/module_UpdateRGTags.bicep'= {
+  name: 'RGTag'
+  params: {
+    rgName: rgName
+    location: location
+    tags: tags
   }
 }
 
@@ -85,6 +90,7 @@ module LogAnalytics '../Modules/module_LogAnalytics.bicep' = {
 }
 
 // Deploy core vnet and subnet
+// Note: this will set the VNET DNS setting to a server which does not yet exist - AADDS or AD server is build in step 2
 module VnetSnetNSG '../Modules/pattern_Vnet_Subnet_NSG.bicep' = {
   name: 'VnetSnetNSG'
   scope: RG
@@ -92,30 +98,10 @@ module VnetSnetNSG '../Modules/pattern_Vnet_Subnet_NSG.bicep' = {
     location: location
     tags: tags
     lawID: LogAnalytics.outputs.logAnalyticsID
-    vnetObject: Config.outputs.vnetAll[localenv].core
+    vnetObject: Config.outputs.vnetAll[localenv][product]
     newDeployment: true
   }
 }
-
-
-// Deploy keyvault
-module Keyvault '../Modules/module_KeyVault.bicep' = {
-  name: 'Keyvault'
-  scope: RG
-  params: {
-    location: location
-    tags: tags
-    lawID: LogAnalytics.outputs.logAnalyticsID
-    keyVaultName: Config.outputs.systemKeyvaults[localenv].coreIdentity.name
-    enablePurgeProtection: false
-    enablesoftDelete: false
-    keyVaultSku: 'standard'
-  }
-}
-
-//Configure some ACLs for the Keyvault
-//Configure some secrets for the AD server - local admin user and password, domain admin user and password
-
 
 // Deploy Bastion
 module Bastion '../Modules/module_Bastion.bicep' = {
@@ -129,9 +115,12 @@ module Bastion '../Modules/module_Bastion.bicep' = {
     bastionPublicIPName: bastionPIPName
     bastionVnetName: Config.outputs.vnetCore[localenv][product].vnetName
   }
+  dependsOn: [
+    VnetSnetNSG
+  ]
 }
 
-var vnetConfig = Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
+//var vnetConfig = Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettings.vnetConfigID]
 
 //Deploy a route table with route to the internet
 // module RouteTableInternet '../Modules/module_UserDefinedRoute.bicep' = {
@@ -160,24 +149,4 @@ var vnetConfig = Config.outputs.vnetCore[localenv][Config.outputs.adDomainSettin
 //   }
 // }
 
-// Deploy VM based AD server
-module ADServer '../Modules/module_VirtualMachine_Windows.bicep' = {
-  name: 'ADServer'
-  scope: RG
-  params: {
-    location: location
-    tags: tags
-    vmName: toLower('${Config.outputs.adDomainSettings.domainServerVM.nameVMObjectNoEnv}${localenv}')
-    vmComputerName: toUpper('${Config.outputs.adDomainSettings.domainServerVM.nameVMNoEnv}${localenv}')
-    vmAdminName: 'testuser'
-    vmAdminPassword: 'test!!!123test'
-    vmSize: Config.outputs.adDomainSettings.domainServerVM.size
-    vmImageObject: Config.outputs.adDomainSettings.domainServerVM.imageRef
-    vnetConfig: vnetConfig
-    snetName: vnetConfig.subnets[Config.outputs.adDomainSettings.snetConfigID].name
-    diagObject: Config.outputs.logAnalytics[localenv]
-  }
-  dependsOn: [
-    VnetSnetNSG
-  ]
-}
+
