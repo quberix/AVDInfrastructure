@@ -20,8 +20,8 @@ if ((!$localenv) -and ($localenv -ne 'dev') -and ($localenv -ne 'prod')) {
 $localConfig = Get_Environment_Config $localenv
 
 $deployedRGs = @(
-    ("$($localConfig.orgCode)-RG-CORE-$localenv").ToUpper()
-    ("$($localConfig.orgCode)-RG-ADSERVER-$localenv").ToUpper()
+    $localConfig.coreRG
+    $localConfig.adRG
 )
 
 #Login to azure
@@ -49,10 +49,16 @@ $confirmation = Read-Host "Do you want to Proceed (y/n):"
 
 #Delete the resource groups and associated resources to remove everything that was deployed
 if ($confirmation -eq 'y') {
-    #Switch to the appropriate environment
-    Write-Host ""
-    Write-Host "Switching to the required subscription" -ForegroundColor Green
-    az account set --subscription $localConfig.subscriptionName
+    #Change context to the correct subscription
+    $subname = $localConfig.subscriptionName
+    $subid = $localConfig.subscriptionID
+    Write-Host "Changing subscription to: $subname" -ForegroundColor Green
+    az account set --subscription $subid
+    if ((az account show --query id -o tsv) -ne $subid) {
+        Write-Host "ERROR: Cannot change to subscription: $subname ($subid)" -ForegroundColor Red
+        exit 1
+    }
+
     Write-Host ""
 
     foreach ($RG in $deployedRGs) {
